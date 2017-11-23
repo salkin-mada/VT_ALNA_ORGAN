@@ -26,18 +26,19 @@ void DetectDistance_setup() {
     // time to 30 ms and 50 ms, respectively, to allow 10 Hz
     // operation (as suggested by Table 6 ("Interleaved mode
     // limits (10 Hz operation)") in the datasheet).
-    vl.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
-    vl.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
+    // vl.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
+    // vl.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
     
     vl.setTimeout(500);
     
     // stop continuous mode if already active
-    vl.stopContinuous();
+    // vl.stopContinuous();
     // in case stopContinuous() triggered a single-shot
     // measurement, wait for it to complete
-    delay(300);
+    // delay(300);
     // start interleaved continuous mode with period of 100 ms
-    vl.startInterleavedContinuous(100);
+    // vl.startInterleavedContinuous(100);
+    Serial.println("VL sensor setup done");
     
 }
 
@@ -52,8 +53,8 @@ void DetectDistance_setup() {
 } */
 
 void DetectDistance_run() {
-
-    range = vl.readRangeContinuousMillimeters();
+    range = vl.readRangeSingleMillimeters();
+    // range = vl.readRangeContinuousMillimeters();
     // rawAmbientLight = vl.readAmbientContinuous();
 
     if (vl.timeoutOccurred()) {

@@ -8,6 +8,8 @@ void isr();
 // void getRawData_noDelay(uint16_t *red, uint16_t *green, uint16_t *blue, uint16_t *clear);
 void DetectColor_setup();
 void DetectColor_run(int&, int&, int&); 
+void DetectColor_human();
+void DetectColor_print();
 
 // ternary min
 static double Min(double a, double b) {
