@@ -6,6 +6,8 @@
 #include "DetectColor.h"
 #include "DetectDistance.h"
 #include "Sound.h"
+#include "Movement.h"
+
 
 extern uint16_t clear, red, green, blue, colorTemp, lux; // raw data
 extern uint8_t range, status;
@@ -13,8 +15,8 @@ extern String colorStr;
 
 
 void setup() {
-    analogReference(EXTERNAL);
-    
+    analogReference(INTERNAL);
+    // analogReference(EXTERNAL);
     // Serial.begin(9600);
     // Serial.begin(19200);
     Serial.begin(115200);
@@ -22,6 +24,7 @@ void setup() {
         // wait for serial
     };
 
+    Movement_setup();
     Sound_setup();
     DetectDistance_setup();
     DetectColor_setup();
@@ -32,9 +35,9 @@ void setup() {
 
 // time guard stuff
 unsigned long previousTimeGuard = 0;
-const long timeGuardInterval = 100;
+const long timeGuardInterval = 50;
 unsigned long previousTimeGuard2 = 0;
-long timeGuardInterval2 = 1000;
+long timeGuardInterval2 = 100;
 
 
 
@@ -50,42 +53,28 @@ void loop() {
         DetectColor_human();
         DetectDistance_run();
         
-        if (timeElapsed - previousTimeGuard >= timeGuardInterval) {
-            Serial.println(colorStr);
-            DetectColor_print();
-            // setFilterType(clear);
+        
+         if (timeElapsed - previousTimeGuard >= timeGuardInterval) {
+            
+            // Serial.print("\n\n");
+            // Serial.println(colorStr);
+            // DetectColor_print();
+
+            Movement_run();
             
             // Vl distance baby
-            Serial.print("\nRange: "); Serial.println(range);
+            // Serial.print("\nRange: "); Serial.println(range);
 
             previousTimeGuard = timeElapsed; 
         }
         
         if (timeElapsed - previousTimeGuard2 >= timeGuardInterval2) {
-            
-            synthTest();
-            
-            
-            // for plotter
-            /* Serial.print(re);
-            Serial.print("\t");
-            Serial.print(ge);
-            Serial.print("\t");
-            Serial.print(be);
-            Serial.print("\t");
-            Serial.print(value.H);
-            Serial.print("\t");
-            Serial.print(value.S * 255);
-            Serial.print("\t");
-            Serial.print(value.V * 255);
-            Serial.print("\t");
-            Serial.println(range); */
-            
-            timeGuardInterval2 = random(5000, 20000);
-            
+            synthState();
+
             previousTimeGuard2 = timeElapsed;
         }
     }
+    // quick scope end
     
 }
 

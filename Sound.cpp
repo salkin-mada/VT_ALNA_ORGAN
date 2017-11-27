@@ -54,7 +54,8 @@ AudioMixer4              mixer9;         //xy=801.4285714285713,207.142857142857
 AudioMixer4              mixer10;        //xy=862.8571428571428,679.9999999999999
 AudioMixer4              mixer11;        //xy=1134.28564453125,472.8571472167969
 AudioEffectReverb        reverb1;        //xy=1269.9998604910715,472.857173374721
-AudioOutputAnalog        dac1;           //xy=1443.746076311384,469.63503592354914
+AudioMixer4              mixer12;        //xy=1319.9998779296875,740
+AudioOutputAnalog        dac1;           //xy=1527.079345703125,636.3017578125
 AudioConnection          patchCord1(waveform2, 0, filter2, 0);
 AudioConnection          patchCord2(waveform5, 0, filter5, 0);
 AudioConnection          patchCord3(waveform1, 0, filter1, 0);
@@ -120,9 +121,13 @@ AudioConnection          patchCord62(mixer6, 0, mixer10, 1);
 AudioConnection          patchCord63(mixer7, 0, mixer10, 2);
 AudioConnection          patchCord64(mixer8, 0, mixer10, 3);
 AudioConnection          patchCord65(mixer9, 0, mixer11, 0);
-AudioConnection          patchCord66(mixer10, 0, mixer11, 1);
-AudioConnection          patchCord67(mixer11, reverb1);
-AudioConnection          patchCord68(reverb1, dac1);
+AudioConnection          patchCord66(mixer9, 0, mixer12, 0);
+AudioConnection          patchCord67(mixer10, 0, mixer11, 1);
+AudioConnection          patchCord68(mixer10, 0, mixer12, 1);
+AudioConnection          patchCord69(mixer11, reverb1);
+AudioConnection          patchCord70(reverb1, 0, mixer12, 2);
+AudioConnection          patchCord71(mixer12, dac1);
+
 
 
 // synth
@@ -135,20 +140,25 @@ unsigned int cutOff = 4000;
 int ftype = 0;
 int filterFadeTime = 200;
 
+int fadeTime = 4000;
+
 extern uint16_t clear, red, green, blue;
 extern unsigned int INTEGRATIONTIME_MAXCOUNT;
+
+extern String colorStr;
+String lastColorStr;
 
 
 void Sound_setup() {
     AudioMemory(20);
-    waveform1.begin(0.3, 200, WAVEFORM_TRIANGLE);
-    waveform2.begin(0.3, 400, WAVEFORM_TRIANGLE);
-    waveform3.begin(0.3, 600, WAVEFORM_TRIANGLE);
-    waveform4.begin(0.3, 800, WAVEFORM_TRIANGLE);
-    waveform5.begin(0.3, 1000, WAVEFORM_TRIANGLE);
-    waveform6.begin(0.3, 1200, WAVEFORM_TRIANGLE);
-    waveform7.begin(0.3, 1600, WAVEFORM_TRIANGLE);
-    waveform8.begin(0.3, 2000, WAVEFORM_TRIANGLE);
+    waveform1.begin(0.3, 200, WAVEFORM_SINE);
+    waveform2.begin(0.3, 400, WAVEFORM_SINE);
+    waveform3.begin(0.3, 600, WAVEFORM_SINE);
+    waveform4.begin(0.3, 800, WAVEFORM_SINE);
+    waveform5.begin(0.3, 1000, WAVEFORM_SINE);
+    waveform6.begin(0.3, 1200, WAVEFORM_SINE);
+    waveform7.begin(0.3, 1600, WAVEFORM_SINE);
+    waveform8.begin(0.3, 2000, WAVEFORM_SINE);
     
     
     
@@ -193,183 +203,363 @@ void Sound_setup() {
     mixer10.gain(1, 0.4);
     mixer10.gain(2, 0.4);
     mixer10.gain(3, 0.4);
-    // final summing
-    mixer11.gain(0, 0.4);
-    mixer11.gain(1, 0.4);
+    // pre verb
+    mixer11.gain(0, 0.3);
+    mixer11.gain(1, 0.3);
 
+    mixer12.gain(0, 3.0);
+    mixer12.gain(1, 3.0);
+    mixer12.gain(2, 3.0);
+    
+    
     // reverb
     reverb1.reverbTime(15.0);
-
     
+    
+}
+
+bool faderFlag = true;
+
+void synthState() {
+    if (colorStr == "GREY" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest3();
+        lastColorStr = colorStr;
+    } else if (colorStr == "WHITE" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest3();
+        lastColorStr = colorStr;
+    } else if (colorStr == "BLACK" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest3();
+        lastColorStr = colorStr;
+    } else if (colorStr == "RED" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest();
+        lastColorStr = colorStr;
+    } else if (colorStr == "ORANGE" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest();
+        lastColorStr = colorStr;
+    } else if (colorStr == "YELLOW" && colorStr != lastColorStr) {
+        fadeOut();
+        lastColorStr = colorStr;
+    } else if (colorStr == "GREEN" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest2();
+        lastColorStr = colorStr;
+    } else if (colorStr == "BLUE" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest();
+        lastColorStr = colorStr;
+    } else if (colorStr == "PURPLE" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest4();
+        lastColorStr = colorStr;
+    } else if (colorStr == "PINK" && colorStr != lastColorStr) {
+        fadeIn();
+        synthTest();
+        lastColorStr = colorStr;
+    }
 }
 
 
 
 void fadeIn() {
     AudioNoInterrupts();
-    filter1LP.fadeIn(timeGuardInterval2);
-    // filter1BP.fadeIn(timeGuardInterval2);
-    // filter1HP.fadeIn(timeGuardInterval2);
-
-    filter2LP.fadeIn(timeGuardInterval2);
-    // filter2BP.fadeIn(timeGuardInterval2);
-    // filter2HP.fadeIn(timeGuardInterval2);
-
-    filter3LP.fadeIn(timeGuardInterval2);
-    // filter3BP.fadeIn(timeGuardInterval2);
-    // filter3HP.fadeIn(timeGuardInterval2);
+    filter1LP.fadeIn(fadeTime);
+    // filter1BP.fadeIn(fadeTime);
+    // filter1HP.fadeIn(fadeTime);
     
-    filter4LP.fadeIn(timeGuardInterval2);
-    // filter4BP.fadeIn(timeGuardInterval2);
-    // filter4HP.fadeIn(timeGuardInterval2);
-
-    filter5LP.fadeIn(timeGuardInterval2);
-    // filter5BP.fadeIn(timeGuardInterval2);
-    // filter5HP.fadeIn(timeGuardInterval2);
-
-    filter6LP.fadeIn(timeGuardInterval2);
-    // filter6BP.fadeIn(timeGuardInterval2);
-    // filter6HP.fadeIn(timeGuardInterval2);
-
-    filter7LP.fadeIn(timeGuardInterval2);
-    // filter7BP.fadeIn(timeGuardInterval2);
-    // filter7HP.fadeIn(timeGuardInterval2);
-
-    filter8LP.fadeIn(timeGuardInterval2);
-    // filter8BP.fadeIn(timeGuardInterval2);
-    // filter8HP.fadeIn(timeGuardInterval2);
+    filter2LP.fadeIn(fadeTime);
+    // filter2BP.fadeIn(fadeTime);
+    // filter2HP.fadeIn(fadeTime);
+    
+    filter3LP.fadeIn(fadeTime);
+    // filter3BP.fadeIn(fadeTime);
+    // filter3HP.fadeIn(fadeTime);
+    
+    filter4LP.fadeIn(fadeTime);
+    // filter4BP.fadeIn(fadeTime);
+    // filter4HP.fadeIn(fadeTime);
+    
+    filter5LP.fadeIn(fadeTime);
+    // filter5BP.fadeIn(fadeTime);
+    // filter5HP.fadeIn(fadeTime);
+    
+    filter6LP.fadeIn(fadeTime);
+    // filter6BP.fadeIn(fadeTime);
+    // filter6HP.fadeIn(fadeTime);
+    
+    filter7LP.fadeIn(fadeTime);
+    // filter7BP.fadeIn(fadeTime);
+    // filter7HP.fadeIn(fadeTime);
+    
+    filter8LP.fadeIn(fadeTime);
+    // filter8BP.fadeIn(fadeTime);
+    // filter8HP.fadeIn(fadeTime);
     AudioInterrupts();
 }
 void fadeOut() {
     AudioNoInterrupts();
-    filter1LP.fadeOut(timeGuardInterval2);
-    // filter1BP.fadeOut(timeGuardInterval2);
-    // filter1HP.fadeOut(timeGuardInterval2);
-
-    filter2LP.fadeOut(timeGuardInterval2);
-    // filter2BP.fadeOut(timeGuardInterval2);
-    // filter2HP.fadeOut(timeGuardInterval2);
-
-    filter3LP.fadeOut(timeGuardInterval2);
-    // filter3BP.fadeOut(timeGuardInterval2);
-    // filter3HP.fadeOut(timeGuardInterval2);
+    filter1LP.fadeOut(fadeTime);
+    // filter1BP.fadeOut(fadeTime);
+    // filter1HP.fadeOut(fadeTime);
     
-    filter4LP.fadeOut(timeGuardInterval2);
-    // filter4BP.fadeOut(timeGuardInterval2);
-    // filter4HP.fadeOut(timeGuardInterval2);
-
-    filter5LP.fadeOut(timeGuardInterval2);
-    // filter5BP.fadeOut(timeGuardInterval2);
-    // filter5HP.fadeOut(timeGuardInterval2);
-
-    filter6LP.fadeOut(timeGuardInterval2);
-    // filter6BP.fadeOut(timeGuardInterval2);
-    // filter6HP.fadeOut(timeGuardInterval2);
-
-    filter7LP.fadeOut(timeGuardInterval2);
-    // filter7BP.fadeOut(timeGuardInterval2);
-    // filter7HP.fadeOut(timeGuardInterval2);
-
-    filter8LP.fadeOut(timeGuardInterval2);
-    // filter8BP.fadeOut(timeGuardInterval2);
-    // filter8HP.fadeOut(timeGuardInterval2);
+    filter2LP.fadeOut(fadeTime);
+    // filter2BP.fadeOut(fadeTime);
+    // filter2HP.fadeOut(fadeTime);
+    
+    filter3LP.fadeOut(fadeTime);
+    // filter3BP.fadeOut(fadeTime);
+    // filter3HP.fadeOut(fadeTime);
+    
+    filter4LP.fadeOut(fadeTime);
+    // filter4BP.fadeOut(fadeTime);
+    // filter4HP.fadeOut(fadeTime);
+    
+    filter5LP.fadeOut(fadeTime);
+    // filter5BP.fadeOut(fadeTime);
+    // filter5HP.fadeOut(fadeTime);
+    
+    filter6LP.fadeOut(fadeTime);
+    // filter6BP.fadeOut(fadeTime);
+    // filter6HP.fadeOut(fadeTime);
+    
+    filter7LP.fadeOut(fadeTime);
+    // filter7BP.fadeOut(fadeTime);
+    // filter7HP.fadeOut(fadeTime);
+    
+    filter8LP.fadeOut(fadeTime);
+    // filter8BP.fadeOut(fadeTime);
+    // filter8HP.fadeOut(fadeTime);
     AudioInterrupts();
 }
 
-bool faderFlag = true;
+
 
 void synthTest() {
-
-    if (faderFlag) {
-        int co1 = random(100, 5000);
-        int co2 = random(100, 5000);
-        int co3 = random(100, 5000);
-        int co4 = random(100, 5000);
-        int co5 = random(100, 5000);
-        int co6 = random(100, 5000);
-        int co7 = random(100, 5000);
-        int co8 = random(100, 5000);
-
-        int wf1 = random(50, 1000);
-        int wf2 = random(50, 1000);
-        int wf3 = random(50, 1000);
-        int wf4 = random(50, 1000);
-        int wf5 = random(50, 1000);
-        int wf6 = random(50, 1000);
-        int wf7 = random(50, 1000);
-        int wf8 = random(50, 1000);
-        
-        AudioNoInterrupts();
-        filter1.frequency(co1);
-        filter2.frequency(co2);
-        filter3.frequency(co3);
-        filter4.frequency(co4);
-        filter5.frequency(co5);
-        filter6.frequency(co6);
-        filter7.frequency(co7);
-        filter8.frequency(co8);
+    int co1 = 4000;
+    int co2 = 4000;
+    int co3 = 4000;
+    int co4 = 4000;
+    int co5 = 4000;
+    int co6 = 4000;
+    int co7 = 4000;
+    int co8 = 4000;
     
-        waveform1.frequency(wf1);
-        waveform2.frequency(wf2);
-        waveform3.frequency(wf3);
-        waveform4.frequency(wf4);
-        waveform5.frequency(wf5);
-        waveform6.frequency(wf6);
-        waveform7.frequency(wf7);
-        waveform8.frequency(wf8);
-        AudioInterrupts();
+    int wf1 = 4000;
+    int wf2 = 4001;
+    int wf3 = 4002;
+    int wf4 = 4003;
+    int wf5 = 4004;
+    int wf6 = 4005;
+    int wf7 = 4006;
+    int wf8 = 4007;
+    
+    AudioNoInterrupts();
+    filter1.frequency(co1);
+    filter2.frequency(co2);
+    filter3.frequency(co3);
+    filter4.frequency(co4);
+    filter5.frequency(co5);
+    filter6.frequency(co6);
+    filter7.frequency(co7);
+    filter8.frequency(co8);
+    
+    waveform1.frequency(wf1);
+    waveform2.frequency(wf2);
+    waveform3.frequency(wf3);
+    waveform4.frequency(wf4);
+    waveform5.frequency(wf5);
+    waveform6.frequency(wf6);
+    waveform7.frequency(wf7);
+    waveform8.frequency(wf8);
+    AudioInterrupts();
+    
+    /* Serial.print("co1  "); Serial.println(co1);
+    Serial.print("co2  "); Serial.println(co2);
+    Serial.print("co3  "); Serial.println(co3);
+    Serial.print("co4  "); Serial.println(co4);
+    Serial.print("co5  "); Serial.println(co5);
+    Serial.print("co6  "); Serial.println(co6);
+    Serial.print("co7  "); Serial.println(co7);
+    Serial.print("co8  "); Serial.println(co8);
+    
+    Serial.print("wf1  "); Serial.println(wf1);
+    Serial.print("wf2  "); Serial.println(wf2);
+    Serial.print("wf3  "); Serial.println(wf3);
+    Serial.print("wf4  "); Serial.println(wf4);
+    Serial.print("wf5  "); Serial.println(wf5);
+    Serial.print("wf6  "); Serial.println(wf6);
+    Serial.print("wf7  "); Serial.println(wf7);
+    Serial.print("wf8  "); Serial.println(wf8);
+    
+    Serial.print("fadeIn  ");
+    Serial.println(timeGuardInterval2); */
+}
 
-        /* Serial.print("co1  "); Serial.println(co1);
-        Serial.print("co2  "); Serial.println(co2);
-        Serial.print("co3  "); Serial.println(co3);
-        Serial.print("co4  "); Serial.println(co4);
-        Serial.print("co5  "); Serial.println(co5);
-        Serial.print("co6  "); Serial.println(co6);
-        Serial.print("co7  "); Serial.println(co7);
-        Serial.print("co8  "); Serial.println(co8);
 
-        Serial.print("wf1  "); Serial.println(wf1);
-        Serial.print("wf2  "); Serial.println(wf2);
-        Serial.print("wf3  "); Serial.println(wf3);
-        Serial.print("wf4  "); Serial.println(wf4);
-        Serial.print("wf5  "); Serial.println(wf5);
-        Serial.print("wf6  "); Serial.println(wf6);
-        Serial.print("wf7  "); Serial.println(wf7);
-        Serial.print("wf8  "); Serial.println(wf8);
-        
-        Serial.print("fadeIn  ");
-        Serial.println(timeGuardInterval2); */
-        fadeIn();
-        faderFlag = false;
-    } else if (faderFlag == false) {
-        /* Serial.println("fadeOut  ");
-        Serial.println(timeGuardInterval2); */        
-        fadeOut();
-        faderFlag = true;
-    }
+void synthTest2() {
+    int co1 = 1200;
+    int co2 = 1200;
+    int co3 = 1200;
+    int co4 = 1200;
+    int co5 = 1600;
+    int co6 = 1600;
+    int co7 = 2200;
+    int co8 = 2200;
+    
+    int wf1 = 120;
+    int wf2 = 130;
+    int wf3 = 140;
+    int wf4 = 150;
+    int wf5 = 230;
+    int wf6 = 150.3;
+    int wf7 = 130.2;
+    int wf8 = 120.1;
+    
+    AudioNoInterrupts();
+    filter1.frequency(co1);
+    filter2.frequency(co2);
+    filter3.frequency(co3);
+    filter4.frequency(co4);
+    filter5.frequency(co5);
+    filter6.frequency(co6);
+    filter7.frequency(co7);
+    filter8.frequency(co8);
+    
+    waveform1.frequency(wf1);
+    waveform2.frequency(wf2);
+    waveform3.frequency(wf3);
+    waveform4.frequency(wf4);
+    waveform5.frequency(wf5);
+    waveform6.frequency(wf6);
+    waveform7.frequency(wf7);
+    waveform8.frequency(wf8);
+    AudioInterrupts();
+}
+
+void synthTest3() {
+
+    int co1 = 600;
+    int co2 = 600;
+    int co3 = 600;
+    int co4 = 600;
+    int co5 = 700;
+    int co6 = 700;
+    int co7 = 800;
+    int co8 = 800;
+    
+    int wf1 = 200;
+    int wf2 = 200.1;
+    int wf3 = 300;
+    int wf4 = 300.1;
+    int wf5 = 500;
+    int wf6 = 501;
+    int wf7 = 800;
+    int wf8 = 807;
+
+/*     int co1 = 600;
+    int co2 = 600;
+    int co3 = 600;
+    int co4 = 600;
+    int co5 = 700;
+    int co6 = 700;
+    int co7 = 800;
+    int co8 = 800;
+    
+    int wf1 = 60;
+    int wf2 = 75;
+    int wf3 = 90;
+    int wf4 = 105;
+    int wf5 = 230;
+    int wf6 = 340;
+    int wf7 = 450;
+    int wf8 = 550; */
+    
+    AudioNoInterrupts();
+    filter1.frequency(co1);
+    filter2.frequency(co2);
+    filter3.frequency(co3);
+    filter4.frequency(co4);
+    filter5.frequency(co5);
+    filter6.frequency(co6);
+    filter7.frequency(co7);
+    filter8.frequency(co8);
+    
+    waveform1.frequency(wf1);
+    waveform2.frequency(wf2);
+    waveform3.frequency(wf3);
+    waveform4.frequency(wf4);
+    waveform5.frequency(wf5);
+    waveform6.frequency(wf6);
+    waveform7.frequency(wf7);
+    waveform8.frequency(wf8);
+    AudioInterrupts();
+}
+
+void synthTest4() {
+    int co1 = 8400;
+    int co2 = 8400;
+    int co3 = 8400;
+    int co4 = 8400;
+    int co5 = 8800;
+    int co6 = 8800;
+    int co7 = 8800;
+    int co8 = 8800;
+    
+    int wf1 = 6000;
+    int wf2 = 7000;
+    int wf3 = 6100;
+    int wf4 = 7100;
+    int wf5 = 6200;
+    int wf6 = 7200;
+    int wf7 = 7300;
+    int wf8 = 7110;
+    
+    AudioNoInterrupts();
+    filter1.frequency(co1);
+    filter2.frequency(co2);
+    filter3.frequency(co3);
+    filter4.frequency(co4);
+    filter5.frequency(co5);
+    filter6.frequency(co6);
+    filter7.frequency(co7);
+    filter8.frequency(co8);
+    
+    waveform1.frequency(wf1);
+    waveform2.frequency(wf2);
+    waveform3.frequency(wf3);
+    waveform4.frequency(wf4);
+    waveform5.frequency(wf5);
+    waveform6.frequency(wf6);
+    waveform7.frequency(wf7);
+    waveform8.frequency(wf8);
+    AudioInterrupts();
 }
 
 void setFilterType(unsigned int ftype) {
     AudioNoInterrupts();
     
-    filter1.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.1*100);
-    filter2.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.2*100);
-    filter3.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.3*100);
-    filter4.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.4*100);
-    filter5.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.5*100);
-    filter6.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.45*100);
-    filter7.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.35*100);
-    filter8.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.25*100);
-
-    waveform1.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.1*1000);
-    waveform2.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.2*1000);
-    waveform3.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.3*1000);
-    waveform4.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.4*1000);
-    waveform5.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.5*1000);
-    waveform6.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.45*1000);
-    waveform7.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.35*1000);
-    waveform8.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.25*1000);
-
+    filter1.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.1*1000);
+    filter2.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.2*1000);
+    filter3.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.3*1000);
+    filter4.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.4*1000);
+    filter5.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.5*1000);
+    filter6.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.45*1000);
+    filter7.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.35*1000);
+    filter8.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.25*1000);
+    
+    waveform1.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.1*100);
+    waveform2.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.2*100);
+    waveform3.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.3*100);
+    waveform4.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.4*100);
+    waveform5.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.5*100);
+    waveform6.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.45*100);
+    waveform7.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.35*100);
+    waveform8.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.25*100);
+    
     // noisey state
     /* filter1.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.1);
     filter2.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.2);
@@ -379,7 +569,7 @@ void setFilterType(unsigned int ftype) {
     filter6.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.45);
     filter7.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.35);
     filter8.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.25);
-
+    
     waveform1.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.1);
     waveform2.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.2);
     waveform3.frequency(INTEGRATIONTIME_MAXCOUNT/ftype*0.3);

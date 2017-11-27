@@ -4,7 +4,10 @@
 
 // Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_16X);
 // Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_4X);
+// Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_16X);
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_4X);
+// Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_60X);
+
 unsigned int INTEGRATIONTIME_MAXCOUNT = 65535; // aka raw data resolution
 /**<  2.4ms - 1 cycle    - Max Count: 1024  */
 /**<  24ms  - 10 cycles  - Max Count: 10240 */
@@ -71,21 +74,20 @@ void DetectColor_setup() {
 
 void DetectColor_human() {
     DetectColor_run(re,ge,be); // returning rgb
-    
     // convert rgb to hsv
     rgbData = RGB(re, ge, be);
     hsv = RGBToHSV(rgbData);
     
-    if(hsv.S <= 0.25 && hsv.V >= 0.40 && hsv.V <= 0.50) {
+    if(hsv.S <= 0.20 && hsv.V >= 0.40 && hsv.V <= 0.50) {
         colorStr = "GREY";
-    } else if (hsv.S <= 0.25 && hsv.V > 0.50) {
+    } else if (hsv.S <= 0.20 && hsv.V > 0.50) {
         colorStr = "WHITE";
-    } else if (hsv.S <= 0.25  && hsv.V < 0.40) {
+    } else if (hsv.S <= 0.20  && hsv.V < 0.40) {
         colorStr = "BLACK";
     }
     else
     {
-        if( (hsv.H >= 0 && hsv.H <= 20) || (hsv.H >= 330 && hsv.H <= 360) ) 
+        if( (hsv.H >= 0 && hsv.H <= 20) || (hsv.H >= 355 && hsv.H <= 360) ) 
         {
             colorStr = "RED";
         } 
@@ -105,11 +107,11 @@ void DetectColor_human() {
         {
             colorStr = "BLUE";
         } 
-        else if (hsv.H > 220 && hsv.H <= 300) 
+        else if (hsv.H > 220 && hsv.H <= 330) 
         {
             colorStr = "PURPLE";
         } 
-        else if (hsv.H > 300 && hsv.H <= 330) 
+        else if (hsv.H > 330 && hsv.H <= 355) 
         {
             colorStr = "PINK";
         } 
