@@ -140,10 +140,12 @@ unsigned int cutOff = 4000;
 int ftype = 0;
 int filterFadeTime = 200;
 
-int fadeTime = 4000;
+int fadeTime = 1000;
 
 extern uint16_t clear, red, green, blue;
 extern unsigned int INTEGRATIONTIME_MAXCOUNT;
+
+extern uint8_t range;
 
 extern String colorStr;
 String lastColorStr;
@@ -206,14 +208,14 @@ void Sound_setup() {
     // pre verb
     mixer11.gain(0, 0.3);
     mixer11.gain(1, 0.3);
-
-    mixer12.gain(0, 3.0);
-    mixer12.gain(1, 3.0);
-    mixer12.gain(2, 3.0);
-    
     
     // reverb
     reverb1.reverbTime(15.0);
+
+    // mute
+    mixer12.gain(0, 0.0);
+    mixer12.gain(1, 0.0);
+    mixer12.gain(2, 0.0);
     
     
 }
@@ -222,43 +224,48 @@ bool faderFlag = true;
 
 void synthState() {
     if (colorStr == "GREY" && colorStr != lastColorStr) {
-        fadeIn();
-        synthTest3();
+        fadeOut();
         lastColorStr = colorStr;
     } else if (colorStr == "WHITE" && colorStr != lastColorStr) {
-        fadeIn();
-        synthTest3();
+        fadeOut();
         lastColorStr = colorStr;
     } else if (colorStr == "BLACK" && colorStr != lastColorStr) {
-        fadeIn();
-        synthTest3();
+        fadeOut();
         lastColorStr = colorStr;
     } else if (colorStr == "RED" && colorStr != lastColorStr) {
+        vanligMix();
         fadeIn();
         synthTest();
         lastColorStr = colorStr;
     } else if (colorStr == "ORANGE" && colorStr != lastColorStr) {
+        hojMix();
         fadeIn();
-        synthTest();
+        synthTest6();
         lastColorStr = colorStr;
     } else if (colorStr == "YELLOW" && colorStr != lastColorStr) {
-        fadeOut();
+        lavMix();
+        fadeIn();
+        synthTest3();
         lastColorStr = colorStr;
     } else if (colorStr == "GREEN" && colorStr != lastColorStr) {
+        hojMix();
         fadeIn();
         synthTest2();
         lastColorStr = colorStr;
     } else if (colorStr == "BLUE" && colorStr != lastColorStr) {
+        vanligMix();
         fadeIn();
-        synthTest();
+        synthTest5();
         lastColorStr = colorStr;
     } else if (colorStr == "PURPLE" && colorStr != lastColorStr) {
+        vanligMix();
         fadeIn();
         synthTest4();
         lastColorStr = colorStr;
     } else if (colorStr == "PINK" && colorStr != lastColorStr) {
+        vanligMix();
         fadeIn();
-        synthTest();
+        synthTest7();
         lastColorStr = colorStr;
     }
 }
@@ -339,23 +346,23 @@ void fadeOut() {
 
 
 void synthTest() {
-    int co1 = 4000;
-    int co2 = 4000;
-    int co3 = 4000;
-    int co4 = 4000;
-    int co5 = 4000;
-    int co6 = 4000;
-    int co7 = 4000;
-    int co8 = 4000;
+    int co1 = 2000;
+    int co2 = 2000;
+    int co3 = 2000;
+    int co4 = 2000;
+    int co5 = 2000;
+    int co6 = 2000;
+    int co7 = 2000;
+    int co8 = 2000;
     
     int wf1 = 4000;
     int wf2 = 4001;
     int wf3 = 4002;
-    int wf4 = 4003;
+    int wf4 = 4013;
     int wf5 = 4004;
-    int wf6 = 4005;
+    int wf6 = 4025;
     int wf7 = 4006;
-    int wf8 = 4007;
+    int wf8 = 4037;
     
     AudioNoInterrupts();
     filter1.frequency(co1);
@@ -517,6 +524,126 @@ void synthTest4() {
     int wf6 = 7200;
     int wf7 = 7300;
     int wf8 = 7110;
+    
+    AudioNoInterrupts();
+    filter1.frequency(co1);
+    filter2.frequency(co2);
+    filter3.frequency(co3);
+    filter4.frequency(co4);
+    filter5.frequency(co5);
+    filter6.frequency(co6);
+    filter7.frequency(co7);
+    filter8.frequency(co8);
+    
+    waveform1.frequency(wf1);
+    waveform2.frequency(wf2);
+    waveform3.frequency(wf3);
+    waveform4.frequency(wf4);
+    waveform5.frequency(wf5);
+    waveform6.frequency(wf6);
+    waveform7.frequency(wf7);
+    waveform8.frequency(wf8);
+    AudioInterrupts();
+}
+
+void synthTest5() {
+    int co1 = 8400;
+    int co2 = 8400;
+    int co3 = 8400;
+    int co4 = 8400;
+    int co5 = 8800;
+    int co6 = 8800;
+    int co7 = 8800;
+    int co8 = 8800;
+    
+    int wf1 = 2000;
+    int wf2 = 3000;
+    int wf3 = 4100;
+    int wf4 = 2100;
+    int wf5 = 3200;
+    int wf6 = 4200;
+    int wf7 = 2300;
+    int wf8 = 3110;
+    
+    AudioNoInterrupts();
+    filter1.frequency(co1);
+    filter2.frequency(co2);
+    filter3.frequency(co3);
+    filter4.frequency(co4);
+    filter5.frequency(co5);
+    filter6.frequency(co6);
+    filter7.frequency(co7);
+    filter8.frequency(co8);
+    
+    waveform1.frequency(wf1);
+    waveform2.frequency(wf2);
+    waveform3.frequency(wf3);
+    waveform4.frequency(wf4);
+    waveform5.frequency(wf5);
+    waveform6.frequency(wf6);
+    waveform7.frequency(wf7);
+    waveform8.frequency(wf8);
+    AudioInterrupts();
+}
+
+void synthTest6() {
+    int co1 = 8400;
+    int co2 = 8400;
+    int co3 = 8400;
+    int co4 = 8400;
+    int co5 = 8800;
+    int co6 = 8800;
+    int co7 = 8800;
+    int co8 = 8800;
+    
+    int wf1 = 2;
+    int wf2 = 3;
+    int wf3 = 4;
+    int wf4 = 5;
+    int wf5 = 6;
+    int wf6 = 7;
+    int wf7 = 8;
+    int wf8 = 9;
+    
+    AudioNoInterrupts();
+    filter1.frequency(co1);
+    filter2.frequency(co2);
+    filter3.frequency(co3);
+    filter4.frequency(co4);
+    filter5.frequency(co5);
+    filter6.frequency(co6);
+    filter7.frequency(co7);
+    filter8.frequency(co8);
+    
+    waveform1.frequency(wf1);
+    waveform2.frequency(wf2);
+    waveform3.frequency(wf3);
+    waveform4.frequency(wf4);
+    waveform5.frequency(wf5);
+    waveform6.frequency(wf6);
+    waveform7.frequency(wf7);
+    waveform8.frequency(wf8);
+    AudioInterrupts();
+}
+
+void synthTest7() {
+    int co1 = 8400;
+    int co2 = 8400;
+    int co3 = 8400;
+    int co4 = 8400;
+    int co5 = 8800;
+    int co6 = 8800;
+    int co7 = 8800;
+    int co8 = 8800;
+    
+    int wf1 = 400;
+    int wf2 = 405;
+    int wf3 = 410;
+    int wf4 = 415;
+    int wf5 = 420;
+    int wf6 = 1100;
+    int wf7 = 1120;
+    int wf8 = 1110;
     
     AudioNoInterrupts();
     filter1.frequency(co1);
@@ -701,4 +828,22 @@ void setFmFreq(unsigned int setter) {
     if (setter >= INTEGRATIONTIME_MAXCOUNT / 12 * 11 && setter <= INTEGRATIONTIME_MAXCOUNT) {
         fmFreq = freq * 6.0;
     }
+}
+
+void vanligMix() {
+    mixer12.gain(0, 3.0);
+    mixer12.gain(1, 3.0);
+    mixer12.gain(2, 3.0);
+}
+
+void lavMix() {
+    mixer12.gain(0, 1.0);
+    mixer12.gain(1, 1.0);
+    mixer12.gain(2, 1.0);
+}
+
+void hojMix() {
+    mixer12.gain(0, 6.0);
+    mixer12.gain(1, 6.0);
+    mixer12.gain(2, 6.0);
 }
