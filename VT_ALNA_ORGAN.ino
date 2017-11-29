@@ -38,6 +38,7 @@ unsigned long previousTimeGuard = 0;
 const long timeGuardInterval = 50;
 unsigned long previousTimeGuard2 = 0;
 long timeGuardInterval2 = 100;
+unsigned long timeElapsed;
 
 
 
@@ -48,7 +49,7 @@ void loop() {
     
     // quick scope begin
     while(1) {
-        unsigned long timeElapsed = millis();
+        timeElapsed = millis();
         
         DetectColor_human();
         DetectDistance_run();
@@ -57,7 +58,7 @@ void loop() {
          if (timeElapsed - previousTimeGuard >= timeGuardInterval) {
             
             // Serial.print("\n\n");
-            // Serial.println(colorStr);
+            Serial.println(colorStr);
             // DetectColor_print();
 
             Movement_run();
